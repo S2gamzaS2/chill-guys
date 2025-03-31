@@ -90,26 +90,29 @@ public class DeliveryService {
         delivery.deletedOf(id);
     }
 
+
     @Transactional
     public void assignPendingDeliveries() {
         List<Delivery> pendingDeliveryies = deliveryRepository.findByDeliveryStatusAndDeletedAtIsNull(DeliveryStatus.PENDING);
 
-        if(!pendingDeliveryies.isEmpty()) {
+        if(pendingDeliveryies.isEmpty()) {
+            return;
+        }
 
-            for(Delivery delivery : pendingDeliveryies) {
-                UUID departureHubId = delivery.getDepartureHubId();
-                UUID destinationHubId = delivery.getDestinationHubId();
-                String type = "HUB";
-                DeliveryManagerInfoDto dto = deliveryManagerClient.assignDeliveryManager(departureHubId, destinationHubId, type);
-                delivery.assignDeliveryManager(dto.getId());
+        for(Delivery delivery : pendingDeliveryies) {
+            UUID departureHubId = delivery.getDepartureHubId();
+            UUID destinationHubId = delivery.getDestinationHubId();
+            String type = "HUB";
+            DeliveryManagerInfoDto dto = deliveryManagerClient.assignDeliveryManager(departureHubId, destinationHubId, type);
+            delivery.assignDeliveryManager(dto.getId());
 
-                log.info("DeliveryManager Assigned");
+            log.info("DeliveryManager Assigned");
 
-                // 배송정보를 kafka로 전송
-                producerService.sendInfo(type, DeliveryInfoMapper.toDto(delivery, dto.getSlackId(), delivery.getRecipientCompany().getAddress()));
-            }
+            // 배송정보를 kafka로 전송
+            producerService.sendInfo(type, DeliveryInfoMapper.toDto(delivery, dto.getSlackId(), delivery.getRecipientCompany().getAddress()));
         }
     }
+
 
     @Transactional
     public void changeDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {

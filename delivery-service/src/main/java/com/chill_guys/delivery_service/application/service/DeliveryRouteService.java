@@ -110,15 +110,17 @@ public class DeliveryRouteService {
     public void assignPendingDeliveries() {
         List<DeliveryRoute> pendingDeliveryies = deliveryRouteRepository.findByStatusAndDeletedAtIsNull(DeliveryRouteStatus.PENDING);
 
-        if(!pendingDeliveryies.isEmpty()) {
-            for(DeliveryRoute deliveryRoute : pendingDeliveryies) {
-                UUID startHubId = deliveryRoute.getStartHudId();
-                UUID endHubId = deliveryRoute.getEndHudId();
-                DeliveryManagerInfoDto dto = deliveryManagerClient.assignDeliveryManager(startHubId, endHubId, "COMPANY");
-                deliveryRoute.assignHubDeliveryManager(dto.getId());
+        if(pendingDeliveryies.isEmpty()) {
+            return;
+        }
 
-                log.info("HubDeliveryManager Assigned");
-            }
+        for(DeliveryRoute deliveryRoute : pendingDeliveryies) {
+            UUID startHubId = deliveryRoute.getStartHudId();
+            UUID endHubId = deliveryRoute.getEndHudId();
+            DeliveryManagerInfoDto dto = deliveryManagerClient.assignDeliveryManager(startHubId, endHubId, "COMPANY");
+            deliveryRoute.assignHubDeliveryManager(dto.getId());
+
+            log.info("HubDeliveryManager Assigned");
         }
     }
 
