@@ -79,8 +79,6 @@ public class DeliveryService {
         if(delivery.isInfoChangeable()) {
             delivery.updateOf(deliveryUpdateRequestDto);
         } else throw new CustomException(DeliveryErrorCode.DELIVERY_IN_START);
-
-        deliveryRepository.save(delivery);
     }
 
     @Transactional
