@@ -1,4 +1,4 @@
-package com.chill_guys.delivery_service.application.service;
+package com.chill_guys.delivery_service.infrastructure.messaging.service;
 
 import com.chill_guys.delivery_service.infrastructure.messaging.dto.DeliveryInfoDto;
 import lombok.RequiredArgsConstructor;
