@@ -20,8 +20,6 @@ public interface DeliveryService {
 
     void deleteDelivery(UUID deliveryId, String userId);
 
-    void assignPendingDeliveries();
-
     void changeDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus);
 
 }
