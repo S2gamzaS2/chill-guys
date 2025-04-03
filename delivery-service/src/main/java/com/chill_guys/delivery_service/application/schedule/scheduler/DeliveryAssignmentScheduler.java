@@ -1,7 +1,6 @@
-package com.chill_guys.delivery_service.application.scheduler;
+package com.chill_guys.delivery_service.application.schedule.scheduler;
 
-import com.chill_guys.delivery_service.application.service.DeliveryRouteService;
-import com.chill_guys.delivery_service.application.service.DeliveryService;
+import com.chill_guys.delivery_service.application.schedule.service.DeliveryAssignmentService;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DeliveryAssignmentScheduler {
 
-    private final DeliveryService deliveryService;
-    private final DeliveryRouteService deliveryRouteService;
+    private final DeliveryAssignmentService deliveryAssignmentService;
+
     private volatile boolean shutdown = false;
 
     @Scheduled(fixedRate = 60000) //1분
@@ -23,8 +22,8 @@ public class DeliveryAssignmentScheduler {
         if(shutdown) return;
 
         try {
-            deliveryService.assignPendingDeliveries();
-            deliveryRouteService.assignPendingDeliveries();
+            deliveryAssignmentService.assignCompanyDeliveryManager();
+            deliveryAssignmentService.assignHubDeliveryManager();
         } catch (Exception e) {
             log.error(e.getMessage());
         }

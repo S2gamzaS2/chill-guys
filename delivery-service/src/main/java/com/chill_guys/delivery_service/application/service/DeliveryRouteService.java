@@ -20,8 +20,6 @@ public interface DeliveryRouteService {
 
     void deleteDeliveryRoute(UUID deliveryId, UUID routesId, String userId);
 
-    void assignPendingDeliveries();
-
     void changeDeliveryStatus(UUID deliveryId, UUID routesId, DeliveryRouteStatus status);
 
 }

@@ -2,14 +2,15 @@ package com.chill_guys.delivery_service.application.service.impl;
 
 import com.chill_guys.delivery_service.application.dto.request.OrderDeliveryRequestDto;
 import com.chill_guys.delivery_service.application.dto.request.DeliveryUpdateRequestDto;
-import com.chill_guys.delivery_service.application.dto.response.DeliveryManagerInfoDto;
 import com.chill_guys.delivery_service.application.dto.response.DeliveryResponseDto;
 import com.chill_guys.delivery_service.application.notification.NotificationService;
 import com.chill_guys.delivery_service.application.service.*;
 import com.chill_guys.delivery_service.application.mapper.DeliveryMapper;
 import com.chill_guys.delivery_service.domain.model.Delivery;
+import com.chill_guys.delivery_service.domain.model.DeliveryRoute;
 import com.chill_guys.delivery_service.domain.model.DeliveryStatus;
 import com.chill_guys.delivery_service.domain.repository.DeliveryRepository;
+import com.chill_guys.delivery_service.domain.repository.DeliveryRouteRepository;
 import com.chill_guys.delivery_service.exception.CustomException;
 import com.chill_guys.delivery_service.exception.DeliveryErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,10 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DeliveryRouteServiceImpl deliveryRouteServiceImpl;
 
-    private final DeliveryManagerService deliveryManagerService;
     private final CompanyService companyService;
     private final ProductService productService;
 
-    private final NotificationService notificationService;
+    private final DeliveryRouteRepository deliveryRouteRepository;
 
     @Override
     @Transactional
@@ -89,30 +89,10 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = findDeliveryById(deliveryId);
         Long id = Long.parseLong(userId);
         delivery.deletedOf(id);
-    }
 
-
-    @Override
-    @Transactional
-    public void assignPendingDeliveries() {
-        List<Delivery> pendingDeliveryies = deliveryRepository.findByDeliveryStatusAndDeletedAtIsNull(DeliveryStatus.PENDING);
-
-        if(pendingDeliveryies.isEmpty()) {
-            return;
-        }
-
-        for(Delivery delivery : pendingDeliveryies) {
-            UUID departureHubId = delivery.getDepartureHubId();
-            UUID destinationHubId = delivery.getDestinationHubId();
-            String type = "HUB";
-            DeliveryManagerInfoDto dto = deliveryManagerService.assignDeliveryManager(departureHubId, destinationHubId, type);
-            delivery.assignDeliveryManager(dto.getId());
-
-            log.info("DeliveryManager Assigned");
-
-            // 배송정보를 kafka로 전송
-            notificationService.sendMessage(type, delivery, dto.getSlackId(), delivery.getRecipientCompany().getAddress());
-
+        List<DeliveryRoute> routeList = deliveryRouteRepository.findByDeliveryIdAndDeletedAtIsNull(deliveryId);
+        for(DeliveryRoute deliveryRoute : routeList) {
+            deliveryRoute.deletedOf(id);
         }
     }
 

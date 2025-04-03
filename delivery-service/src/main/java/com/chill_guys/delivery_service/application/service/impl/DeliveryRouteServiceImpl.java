@@ -114,25 +114,6 @@ public class DeliveryRouteServiceImpl implements DeliveryRouteService {
 
     @Override
     @Transactional
-    public void assignPendingDeliveries() {
-        List<DeliveryRoute> pendingDeliveries = deliveryRouteRepository.findByStatusAndDeletedAtIsNull(DeliveryRouteStatus.PENDING);
-
-        if(pendingDeliveries.isEmpty()) {
-            return;
-        }
-
-        for(DeliveryRoute deliveryRoute : pendingDeliveries) {
-            UUID startHubId = deliveryRoute.getStartHudId();
-            UUID endHubId = deliveryRoute.getEndHudId();
-            DeliveryManagerInfoDto dto = deliveryManagerService.assignDeliveryManager(startHubId, endHubId, "COMPANY");
-            deliveryRoute.assignHubDeliveryManager(dto.getId());
-
-            log.info("HubDeliveryManager Assigned");
-        }
-    }
-
-    @Override
-    @Transactional
     public void changeDeliveryStatus(UUID deliveryId, UUID routesId, DeliveryRouteStatus status) {
         DeliveryRoute deliveryRoute = findDeliveryRouteById(routesId, deliveryId);
         deliveryRoute.changeDeliveryStatus(status);
